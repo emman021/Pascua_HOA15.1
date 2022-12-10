@@ -1,0 +1,28 @@
+- name: Neutron installation
+  apt:
+    name: neutron-linuxbridge-agent
+    state: present
+    update_cache: yes
+
+- name: Configuration of Neutron
+  copy:
+    dest: /etc/neutron/neutron.conf
+    content: |
+      [DEFAULT]
+      auth_strategy = keystone
+      [keystone_authtoken]
+      www_authenticate_uri = http://controller:5000
+      auth_url = http://controller:5000
+      memcached_servers = controller:11211
+      auth_type = password
+      project_domain_name = default
+      user_domain_name = default
+      project_name = service
+      username = Neutron
+      password = 123456789
+
+- name: Neutron Restarting
+  service:
+     name: neutron-linuxbridge-agent
+     state: restarted
+     enabled: yes

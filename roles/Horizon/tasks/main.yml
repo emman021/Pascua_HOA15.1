@@ -1,0 +1,38 @@
+- name: Horizon installation and its prerequisite
+  apt:
+    name:
+      - openstack-dashboard
+    state: present
+    update_cache: yes
+
+- name: Horizon Configuration
+  copy:
+    dest: /etc/openstack-dashboard/local_settings.py
+    content: |
+      CACHES = {
+          'default': {
+              'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', 'LOCATION': 192.168.56.102:11211',
+              },
+              }
+      SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+      OPENSTACK_HOST = "192.168.56.102"
+      OPENSTACK_KEYSTONE_URL = "http://%s/identity/v3" % OPENSTACK_HOST
+      OPENSTACK_KEYSTONE_URL = "http://192.168.56.102:5000/v3"
+      TIME_ZONE = "Asia/Tokyo"
+      OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True
+      OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = 'Default'
+      OPENSTACK_API_VERSIONS = {
+          "identity": 3,
+          "volume": 3,
+          "compute": 2,
+      }
+      WSGIApplicationGroup %{GLOBAL}
+
+- name: Apache2 installation
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes
+
+- name: Apache2 Restarting
+  shell: sudo systemctl reload apache2.service
